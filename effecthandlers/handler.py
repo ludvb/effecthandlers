@@ -15,8 +15,14 @@ class ReturnValue:
     value: Any
 
 
-class NoHandlerError(RuntimeError):
-    pass
+class NoHandlerError(Exception):
+    __match_args__ = ("message",)
+
+    def __init__(self, message: Message):
+        self.message = message
+
+    def __str__(self):
+        return f"No handler for message: {self.message}"
 
 
 class Handler(metaclass=ABCMeta):
@@ -61,7 +67,7 @@ def send(message: Message, interpret_final: bool = True) -> Any:
                     )
                     return value
         else:
-            raise NoHandlerError("Unhandled message: " + type(message).__name__)
+            raise NoHandlerError(message)
     finally:
         _STACK_PTR.pop()
 
